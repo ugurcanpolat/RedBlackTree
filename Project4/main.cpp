@@ -15,6 +15,32 @@
 
 using namespace std;
 
+typedef enum Color {
+    RED=0, BLACK
+} Color;
+
+typedef struct Node {
+    string name; // key
+    char gender;
+    int age;
+    Color color;
+    Node *parent;
+    Node *left;
+    Node *right;
+} Node;
+
+class RBTree {
+  private:
+    Node *root;
+    void rotateLeft(Node*& rotate_around);
+    void rotateRight(Node*& rotate_around);
+    void treeInsert(Node*& new_node);
+  public:
+    RBTree();
+    void insert(Node*& new_node);
+    void print() const;
+};
+
 int main(int argc, const char * argv[]) {
     // Input file name argument must be passed with run command
     if (argc != 2) {
@@ -30,6 +56,8 @@ int main(int argc, const char * argv[]) {
         cout << endl << "Error opening input file." << endl << endl;
         return 0;
     }
+    
+    RBTree tree;
     
     string line;
     while(!inputFile.eof()) {
@@ -52,4 +80,60 @@ int main(int argc, const char * argv[]) {
     // Close the input file since it is no longer needed
     inputFile.close();
     return 0;
+}
+
+RBTree::RBTree() {
+    root = nullptr;
+}
+
+void RBTree::treeInsert(Node*& new_node) {
+}
+
+void RBTree::rotateLeft(Node*& rotate_around) {
+}
+
+void RBTree::rotateRight(Node*& rotate_around) {
+}
+
+void RBTree::insert(Node*& new_node) {
+    treeInsert(new_node);
+    new_node->color = RED;
+    while (new_node != root && (new_node->parent)->color == RED) {
+        Node *parent = new_node->parent;
+        Node *grandparent = parent->parent;
+        if (parent == grandparent->left) {
+            Node* uncle = grandparent->right;
+            if (uncle->color == RED) {
+                parent->color = BLACK;
+                uncle->color = BLACK;
+                grandparent->color = RED;
+                new_node = grandparent;
+            } else {
+                if (new_node == parent->right) {
+                    new_node = parent;
+                    rotateLeft(new_node);
+                }
+                parent->color = BLACK;
+                grandparent->color = RED;
+                rotateRight(grandparent);
+            }
+        } else {
+            Node* uncle = grandparent->left;
+            if (uncle->color == RED) {
+                parent->color = BLACK;
+                uncle->color = BLACK;
+                grandparent->color = RED;
+                new_node = grandparent;
+            } else {
+                if (new_node == parent->left) {
+                    new_node = parent;
+                    rotateRight(new_node);
+                }
+                parent->color = BLACK;
+                grandparent->color = RED;
+                rotateLeft(grandparent);
+            }
+        }
+    }
+    root->color = BLACK;
 }
