@@ -75,6 +75,13 @@ int main(int argc, const char * argv[]) {
         getline(linestream, read[0], '\t');
         getline(linestream, read[1], '\t');
         linestream >> read[2];
+        
+        // Create a new node and insert it to the tree
+        Node* new_node = new Node;
+        new_node->name = read[0];
+        new_node->gender = read[1][0];
+        new_node->age = stoi(read[2]);
+        tree.insert(new_node);
     }
     
     // Close the input file since it is no longer needed
@@ -87,23 +94,81 @@ RBTree::RBTree() {
 }
 
 void RBTree::treeInsert(Node*& new_node) {
+    Node *y = nullptr;
+    Node *x = root;
+    
+    while (x != nullptr) {
+        y = x;
+        if ((new_node->name).compare(x->name) < 0)
+            x = x->left;
+        else
+            x = x->right;
+    }
+    
+    new_node->parent = y;
+    
+    if (y == nullptr)
+        root = new_node;
+    else if ((new_node->name).compare(y->name) < 0)
+        y->left = new_node;
+    else
+        y->right = new_node;
+    
+    new_node->left = nullptr;
+    new_node->right = nullptr;
 }
 
 void RBTree::rotateLeft(Node*& rotate_around) {
+    Node* y = rotate_around->right;
+    rotate_around->right = y->left;
+    
+    if (y->left != nullptr)
+        (y->left)->parent = rotate_around;
+    
+    y->parent = rotate_around->parent;
+    
+    if (rotate_around->parent == nullptr)
+        root = y;
+    else if (rotate_around == (rotate_around->parent)->left)
+        (rotate_around->parent)->left = y;
+    else
+        (rotate_around->parent)->right = y;
+    
+    y->left = rotate_around;
+    rotate_around->parent = y;
 }
 
 void RBTree::rotateRight(Node*& rotate_around) {
+    Node* y = rotate_around->left;
+    rotate_around->left = y->right;
+    
+    if (y->right != nullptr)
+        (y->right)->parent = rotate_around;
+    
+    y->parent = rotate_around->parent;
+    
+    if (rotate_around->parent == nullptr)
+        root = y;
+    else if (rotate_around == (rotate_around->parent)->left)
+        (rotate_around->parent)->left = y;
+    else
+        (rotate_around->parent)->right = y;
+    
+    y->right = rotate_around;
+    rotate_around->parent = y;
 }
 
 void RBTree::insert(Node*& new_node) {
     treeInsert(new_node);
     new_node->color = RED;
+    
     while (new_node != root && (new_node->parent)->color == RED) {
         Node *parent = new_node->parent;
         Node *grandparent = parent->parent;
         if (parent == grandparent->left) {
             Node* uncle = grandparent->right;
-            if (uncle->color == RED) {
+            Color uncleColor = (uncle == nullptr) ? BLACK : RED;
+            if (uncleColor == RED) {
                 parent->color = BLACK;
                 uncle->color = BLACK;
                 grandparent->color = RED;
@@ -119,7 +184,8 @@ void RBTree::insert(Node*& new_node) {
             }
         } else {
             Node* uncle = grandparent->left;
-            if (uncle->color == RED) {
+            Color uncleColor = (uncle == nullptr) ? BLACK : RED;
+            if (uncleColor == RED) {
                 parent->color = BLACK;
                 uncle->color = BLACK;
                 grandparent->color = RED;
