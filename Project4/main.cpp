@@ -37,7 +37,9 @@ class RBTree {
     void rotateLeft(Node*& rotate_around);
     void rotateRight(Node*& rotate_around);
     void treeInsert(Node*& new_node);
-    void recursivePrint(Node* root, int number_of_nestings) const;
+    void recursivePrint(Node* root, int depth) const;
+    Node* findNthWoman(Node* check, int n) const;
+    Node* findNthMan(Node* check, int n) const;
   public:
     RBTree();
     void insert(Node*& new_node);
@@ -213,27 +215,57 @@ void RBTree::insert(Node*& new_node) {
     root->color = BLACK;
 }
 
+Node* RBTree::findNthWoman(Node* check, int n) const {
+    int r = (check->left)->num_woman;
+    
+    if(check->gender == 'F')
+        r++;
+    
+    if (n == r)
+        return check;
+    else if (n < r)
+        return findNthWoman(check->left, n);
+    else
+        return findNthWoman(check->right, n-r);
+}
+
+Node* RBTree::findNthMan(Node* check, int n) const {
+    int r = (check->left)->num_man;
+    
+    if(check->gender == 'M')
+        r++;
+    
+    if (n == r)
+        return check;
+    else if (n < r)
+        return findNthMan(check->left, n);
+    else
+        return findNthMan(check->right, n-r);
+}
+
 string RBTree::nthWoman(int n) const {
-    return "";
+    Node* NthWoman = findNthWoman(root, n);
+    return NthWoman->name;
 }
 
 string RBTree::nthMan(int n) const {
-    return "";
+    Node* NthMan = findNthMan(root, n);
+    return NthMan->name;
 }
 
-void RBTree::recursivePrint(Node *root, int number_of_nestings) const {
+void RBTree::recursivePrint(Node *root, int depth) const {
     if (root->left != nullptr)
-        recursivePrint(root->left, number_of_nestings+2);
+        recursivePrint(root->left, depth+2);
     
     if (root->parent != nullptr) {
-        for(int i = 0; i < number_of_nestings; i++)
+        for(int i = 0; i < depth; i++)
             cout << "\t";
         
         if(root == (root->parent)->left)
-            cout << "┌──";
+            cout << "┌───";
         
         else if(root == (root->parent)->right)
-            cout << "└──";
+            cout << "└───";
     }
     
     if(root->color == RED)
@@ -243,7 +275,7 @@ void RBTree::recursivePrint(Node *root, int number_of_nestings) const {
     cout << root->name << '-' << root->age << '-' << root->gender << endl;
     
     if (root->right != nullptr)
-        recursivePrint(root->right, number_of_nestings+2);
+        recursivePrint(root->right, depth+2);
 }
 
 void RBTree::print() const {
