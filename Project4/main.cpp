@@ -8,8 +8,8 @@
  
  * * * * * * * * * * * * * * * * * */
 
-#include <iostream> // cout
-#include <fstream> // ifstream
+#include <iostream>  // cout
+#include <fstream>  // ifstream
 #include <sstream> // stringstream
 #include <string> // string, stoi
 
@@ -23,6 +23,8 @@ typedef struct Node {
     string name; // key
     char gender;
     int age;
+    int num_woman;
+    int num_man;
     Color color;
     Node *parent;
     Node *left;
@@ -35,9 +37,12 @@ class RBTree {
     void rotateLeft(Node*& rotate_around);
     void rotateRight(Node*& rotate_around);
     void treeInsert(Node*& new_node);
+    void recursivePrint(Node* root, int number_of_nestings) const;
   public:
     RBTree();
     void insert(Node*& new_node);
+    string nthWoman(int n) const;
+    string nthMan(int n) const;
     void print() const;
 };
 
@@ -86,6 +91,10 @@ int main(int argc, const char * argv[]) {
     
     // Close the input file since it is no longer needed
     inputFile.close();
+    
+    tree.print();
+    cout << "3rd woman: " << tree.nthWoman(3) << endl;
+    cout << "4th man: " << tree.nthMan(4) << endl << endl;
     return 0;
 }
 
@@ -202,4 +211,45 @@ void RBTree::insert(Node*& new_node) {
         }
     }
     root->color = BLACK;
+}
+
+string RBTree::nthWoman(int n) const {
+    return "";
+}
+
+string RBTree::nthMan(int n) const {
+    return "";
+}
+
+void RBTree::recursivePrint(Node *root, int number_of_nestings) const {
+    if (root->left != nullptr)
+        recursivePrint(root->left, number_of_nestings+2);
+    
+    if (root->parent != nullptr) {
+        for(int i = 0; i < number_of_nestings; i++)
+            cout << "\t";
+        
+        if(root == (root->parent)->left)
+            cout << "┌──";
+        
+        else if(root == (root->parent)->right)
+            cout << "└──";
+    }
+    
+    if(root->color == RED)
+        cout << "(R)";
+    else
+        cout << "(B)";
+    cout << root->name << '-' << root->age << '-' << root->gender << endl;
+    
+    if (root->right != nullptr)
+        recursivePrint(root->right, number_of_nestings+2);
+}
+
+void RBTree::print() const {
+    if (root == nullptr)
+        return;
+    
+    recursivePrint(root, 0);
+    cout << endl << endl;
 }
