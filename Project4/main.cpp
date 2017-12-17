@@ -38,10 +38,12 @@ class RBTree {
     void rotateRight(Node*& rotate_around);
     void treeInsert(Node*& new_node);
     void recursivePrint(Node* root, int depth) const;
+    void freeMemory(Node*& root);
     Node* findNthWoman(Node* check, int n) const;
     Node* findNthMan(Node* check, int n) const;
   public:
     RBTree();
+    ~RBTree();
     void insert(Node*& new_node);
     string nthWoman(int n) const;
     string nthMan(int n) const;
@@ -109,6 +111,18 @@ int main(int argc, const char * argv[]) {
 
 RBTree::RBTree() {
     root = nullptr;
+}
+
+RBTree::~RBTree() {
+    freeMemory(root);
+}
+
+void RBTree::freeMemory(Node*& root) {
+    if (root != nullptr) {
+        freeMemory(root->left);
+        freeMemory(root->right);
+        delete root;
+    }
 }
 
 void RBTree::treeInsert(Node*& new_node) {
