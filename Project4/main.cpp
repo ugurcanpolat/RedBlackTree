@@ -88,6 +88,13 @@ int main(int argc, const char * argv[]) {
         new_node->name = read[0];
         new_node->gender = read[1][0];
         new_node->age = stoi(read[2]);
+        new_node->num_woman = new_node->num_man = 0;
+        
+        if (new_node->gender == 'F')
+            new_node->num_woman++;
+        else
+            new_node->num_man++;
+        
         tree.insert(new_node);
     }
     
@@ -110,6 +117,12 @@ void RBTree::treeInsert(Node*& new_node) {
     
     while (x != nullptr) {
         y = x;
+        
+        if (new_node->gender == 'F')
+            y->num_woman++;
+        else
+            y->num_man++;
+        
         if ((new_node->name).compare(x->name) < 0)
             x = x->left;
         else
@@ -147,6 +160,25 @@ void RBTree::rotateLeft(Node*& rotate_around) {
     
     y->left = rotate_around;
     rotate_around->parent = y;
+    
+    y->num_woman = rotate_around->num_woman;
+    y->num_man = rotate_around->num_man;
+    
+    if (rotate_around->left != nullptr) {
+        rotate_around->num_woman = (rotate_around->left)->num_woman;
+        rotate_around->num_man = (rotate_around->left)->num_man;
+    } else
+        rotate_around->num_woman = rotate_around->num_man = 0;
+    
+    if (rotate_around->right != nullptr) {
+        rotate_around->num_woman += (rotate_around->right)->num_woman;
+        rotate_around->num_man += (rotate_around->right)->num_man;
+    }
+    
+    if (rotate_around->gender == 'F')
+        rotate_around->num_woman++;
+    else
+        rotate_around->num_man++;
 }
 
 void RBTree::rotateRight(Node*& rotate_around) {
@@ -167,6 +199,25 @@ void RBTree::rotateRight(Node*& rotate_around) {
     
     y->right = rotate_around;
     rotate_around->parent = y;
+    
+    y->num_woman = rotate_around->num_woman;
+    y->num_man = rotate_around->num_man;
+    
+    if (rotate_around->left != nullptr) {
+        rotate_around->num_woman = (rotate_around->left)->num_woman;
+        rotate_around->num_man = (rotate_around->left)->num_man;
+    } else
+        rotate_around->num_woman = rotate_around->num_man = 0;
+    
+    if (rotate_around->right != nullptr) {
+        rotate_around->num_woman += (rotate_around->right)->num_woman;
+        rotate_around->num_man += (rotate_around->right)->num_man;
+    }
+    
+    if (rotate_around->gender == 'F')
+        rotate_around->num_woman++;
+    else
+        rotate_around->num_man++;
 }
 
 void RBTree::insert(Node*& new_node) {
@@ -216,13 +267,26 @@ void RBTree::insert(Node*& new_node) {
 }
 
 Node* RBTree::findNthWoman(Node* check, int n) const {
-    int r = (check->left)->num_woman;
+    if (check == nullptr)
+        return nullptr;
     
+    int r = 0;
+    if (check->left != nullptr)
+        r = (check->left)->num_woman;
+
     if(check->gender == 'F')
         r++;
     
-    if (n == r)
+    if (n == r) {
+        if (check->gender != 'F') {
+            Node* temp = check;
+            check = findNthWoman(check->left, n);
+            
+            if (check == nullptr)
+                return findNthWoman(temp->right, n);
+        }
         return check;
+    }
     else if (n < r)
         return findNthWoman(check->left, n);
     else
@@ -230,13 +294,26 @@ Node* RBTree::findNthWoman(Node* check, int n) const {
 }
 
 Node* RBTree::findNthMan(Node* check, int n) const {
-    int r = (check->left)->num_man;
+    if (check == nullptr)
+        return nullptr;
+    
+    int r = 0;
+    if (check->left != nullptr)
+        r = (check->left)->num_man;
     
     if(check->gender == 'M')
         r++;
     
-    if (n == r)
+    if (n == r) {
+        if (check->gender != 'M') {
+            Node* temp = check;
+            check = findNthMan(check->left, n);
+            
+            if (check == nullptr)
+                return findNthMan(temp->right, n);
+        }
         return check;
+    }
     else if (n < r)
         return findNthMan(check->left, n);
     else
