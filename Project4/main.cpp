@@ -114,10 +114,11 @@ RBTree::RBTree() {
 }
 
 RBTree::~RBTree() {
-    freeMemory(root);
+    freeMemory(root); // Recursive call
 }
 
 void RBTree::freeMemory(Node*& root) {
+    // Recursively free up the memory used by the tree
     if (root != nullptr) {
         freeMemory(root->left);
         freeMemory(root->right);
@@ -126,12 +127,18 @@ void RBTree::freeMemory(Node*& root) {
 }
 
 void RBTree::treeInsert(Node*& new_node) {
+    // This function inserts the new node to the tree with
+    // BST properties. This will break the RBT properties
+    // which will be fixed in the |insert| function.
+    
     Node *y = nullptr;
     Node *x = root;
     
     while (x != nullptr) {
         y = x;
         
+        // Increment the num_(wo)man of visited nodes which will be
+        // ascendants of the new node.
         if (new_node->gender == 'F')
             y->num_woman++;
         else
@@ -145,7 +152,7 @@ void RBTree::treeInsert(Node*& new_node) {
     
     new_node->parent = y;
     
-    if (y == nullptr)
+    if (y == nullptr) // Tree is empty
         root = new_node;
     else if ((new_node->name).compare(y->name) < 0)
         y->left = new_node;
@@ -157,6 +164,9 @@ void RBTree::treeInsert(Node*& new_node) {
 }
 
 void RBTree::rotateLeft(Node*& rotate_around) {
+    // This function inserted according to the pseudocode
+    // in the lecture slides.
+    
     Node* y = rotate_around->right;
     rotate_around->right = y->left;
     
@@ -175,9 +185,18 @@ void RBTree::rotateLeft(Node*& rotate_around) {
     y->left = rotate_around;
     rotate_around->parent = y;
     
+    // Change the num_(wo)man values of affected nodes. This part is
+    // implemented according to pseudocode in the lecture slides with
+    // slight modifications.
+    
+    // y is parent of the nodes now, get the sizes from the previous
+    // parent.
+    
     y->num_woman = rotate_around->num_woman;
     y->num_man = rotate_around->num_man;
     
+    // Change the sizes of |rotate_around| by calculating the
+    // subtree sizes.
     if (rotate_around->left != nullptr) {
         rotate_around->num_woman = (rotate_around->left)->num_woman;
         rotate_around->num_man = (rotate_around->left)->num_man;
@@ -189,13 +208,16 @@ void RBTree::rotateLeft(Node*& rotate_around) {
         rotate_around->num_man += (rotate_around->right)->num_man;
     }
     
-    if (rotate_around->gender == 'F')
+    if (rotate_around->gender == 'F') // Include the node itself
         rotate_around->num_woman++;
     else
         rotate_around->num_man++;
 }
 
 void RBTree::rotateRight(Node*& rotate_around) {
+    // This function inserted according to the pseudocode
+    // in the lecture slides.
+    
     Node* y = rotate_around->left;
     rotate_around->left = y->right;
     
@@ -214,9 +236,18 @@ void RBTree::rotateRight(Node*& rotate_around) {
     y->right = rotate_around;
     rotate_around->parent = y;
     
+    
+    // Change the num_(wo)man values of affected nodes. This part is
+    // implemented according to pseudocode in the lecture slides with
+    // slight modifications.
+    
+    // y is parent of the nodes now, get the sizes from the previous
+    // parent.
     y->num_woman = rotate_around->num_woman;
     y->num_man = rotate_around->num_man;
     
+    // Change the sizes of |rotate_around| by calculating the
+    // subtree sizes.
     if (rotate_around->left != nullptr) {
         rotate_around->num_woman = (rotate_around->left)->num_woman;
         rotate_around->num_man = (rotate_around->left)->num_man;
@@ -228,14 +259,17 @@ void RBTree::rotateRight(Node*& rotate_around) {
         rotate_around->num_man += (rotate_around->right)->num_man;
     }
     
-    if (rotate_around->gender == 'F')
+    if (rotate_around->gender == 'F') // Include the node itself
         rotate_around->num_woman++;
     else
         rotate_around->num_man++;
 }
 
 void RBTree::insert(Node*& new_node) {
-    treeInsert(new_node);
+    // This function inserted according to the pseudocode
+    // in the lecture slides.
+    
+    treeInsert(new_node); // BST insert
     new_node->color = RED;
     
     while (new_node != root && (new_node->parent)->color == RED) {
@@ -281,21 +315,27 @@ void RBTree::insert(Node*& new_node) {
 }
 
 Node* RBTree::findNthWoman(Node* check, int n) const {
+    // If node is empty return nullptr to inform it is not found
     if (check == nullptr)
         return nullptr;
     
     int r = 0;
     if (check->left != nullptr)
-        r = (check->left)->num_woman;
+        r = (check->left)->num_woman; // Rank
 
+    // If check is also female, include it in the rank.
     if(check->gender == 'F')
         r++;
     
-    if (n == r) {
+    if (n == r) { // Found?
+        // Rank matches but this node is not we're looking for
         if (check->gender != 'F') {
-            Node* temp = check;
+            Node* temp = check; // Store it temporarily
+            // Check if the node we're looking for is on the left
+            // subtree.
             check = findNthWoman(check->left, n);
             
+            // If it is not found, look into the right subtree.
             if (check == nullptr)
                 return findNthWoman(temp->right, n);
         }
@@ -308,21 +348,27 @@ Node* RBTree::findNthWoman(Node* check, int n) const {
 }
 
 Node* RBTree::findNthMan(Node* check, int n) const {
+    // If node is empty return nullptr to inform it is not found
     if (check == nullptr)
         return nullptr;
     
     int r = 0;
     if (check->left != nullptr)
-        r = (check->left)->num_man;
+        r = (check->left)->num_man; // Rank
     
+    // If check is also male, include it in the rank.
     if(check->gender == 'M')
         r++;
     
-    if (n == r) {
+    if (n == r) { // Found?
+        // Rank matches but this node is not we're looking for
         if (check->gender != 'M') {
-            Node* temp = check;
+            Node* temp = check; // Store it temporarily
+            // Check if the node we're looking for is on the left
+            // subtree.
             check = findNthMan(check->left, n);
             
+            // If it is not found, look into the right subtree.
             if (check == nullptr)
                 return findNthMan(temp->right, n);
         }
@@ -345,9 +391,10 @@ string RBTree::nthMan(int n) const {
 }
 
 void RBTree::recursivePrint(Node *root, int depth) const {
-    if (root->left != nullptr)
+    if (root->left != nullptr) // Print left subtree
         recursivePrint(root->left, depth+2);
     
+    // Print root
     if (root->parent != nullptr) {
         for(int i = 0; i < depth; i++)
             cout << "\t";
@@ -365,7 +412,7 @@ void RBTree::recursivePrint(Node *root, int depth) const {
         cout << "(B)";
     cout << root->name << '-' << root->age << '-' << root->gender << endl;
     
-    if (root->right != nullptr)
+    if (root->right != nullptr) // Print right subtree
         recursivePrint(root->right, depth+2);
 }
 
